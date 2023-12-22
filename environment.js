@@ -1,16 +1,28 @@
 class Environment {
-    constructor(record = {}) {
+    constructor(record = {}, parent = null) {
         this.record = record
+        this.parent = parent
     }
-    set(variable, value) {
+    define(variable, value) {
         this.record[variable] = value
         return value
     }
+    assign(variable, value) {
+        this.resolve(variable).record[variable] = value
+        return value
+    }
     lookup(variable) {
-        if (!this.record.hasOwnProperty(variable)) {
-            throw `VariableNotFound ${variable}`
+        return this.resolve(variable).record[variable]
+    }
+
+    resolve(variable) {
+        if (this.record.hasOwnProperty(variable)) {
+            return this
         }
-        return this.record[variable]
+        if (this.parent)
+            return this.resolve(variable)
+
+        throw `VariableNotFound ${variable}`
     }
 }
 

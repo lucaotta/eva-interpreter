@@ -14,33 +14,42 @@ class Eva {
 
         // ---- Math operations
         if (input[0] === '+') {
-            // console.log("Evaluating expression " + input)
-            let left = this.eval(input[1])
-            let right = this.eval(input[2])
-            // console.log("Left is " + left)
-            // console.log("Right is " + right)
-
-            return left + right
+            return this.eval(input[1], env) + this.eval(input[2], env)
         }
 
         if (input[0] === '*') {
-            return this.eval(input[1]) * this.eval(input[2], env)
+            return this.eval(input[1], env) * this.eval(input[2], env)
         }
 
         if (input[0] === '-') {
-            return this.eval(input[1]) - this.eval(input[2], env)
+            return this.eval(input[1], env) - this.eval(input[2], env)
         }
 
         if (input[0] === '/') {
-            return this.eval(input[1]) / this.eval(input[2], env)
+            return this.eval(input[1], env) / this.eval(input[2], env)
         }
 
         // -------- Variables
         if (input[0] === 'var') {
-            return this.env.set(input[1], this.eval(input[2], env))
+            return env.define(input[1], this.eval(input[2], env))
         }
+
+        if (input[0] === 'set') {
+            const [_, variable, value] = input
+            return env.assign(variable, this.eval(value, env))
+        }
+
+        if (input[0] === 'begin') {
+            let result = null
+            let blockEnv = new Environment({}, env)
+            for (let i = 1; i < input.length; i++) {
+                result = this.eval(input[i], blockEnv)
+            }
+            return result
+        }
+
         if (isVariableName(input)) {
-            return this.env.lookup(input)
+            return env.lookup(input)
         }
 
         throw `Unimplemented expression ${JSON.stringify(input)}`
@@ -60,7 +69,12 @@ function isVariableName(input) {
 }
 
 // ----------------------- TESTING --------------------
-i = new Eva()
+i = new Eva(new Environment({
+    'true': true,
+    'false': false,
+    'null': null,
+    'VERSION': 0.1,
+}))
 
 assert.strictEqual(i.eval(1), 1)
 assert.strictEqual(i.eval('"Hello"'), 'Hello')
@@ -73,13 +87,28 @@ assert.strictEqual(i.eval(['-', 5, ['*', 3, 2]]), -1)
 assert.strictEqual(i.eval(['-', 5, ['/', 3, 2]]), 3.5)
 
 assert.strictEqual(i.eval(['var', 'x', 10]), 10)
+assert.strictEqual(i.eval(['var', 'x', 'true']), true)
 assert.strictEqual(i.eval(['var', 'x', ['*', 10, 10]]), 100)
 assert.strictEqual(i.eval('x'), 100)
 assert.strictEqual(i.eval(['var', '_x3', 42]), 42)
 assert.strictEqual(i.eval('_x3'), 42)
+assert.strictEqual(i.eval(['set', '_x3', -1]), -1)
+assert.strictEqual(i.eval(['set', '_x3', ['/', 3, 2]]), 1.5)
 
+// --- BLOCKS ---
 assert.strictEqual(i.eval(['begin',
-  ['var', 'x', 10]
-]))
+  ['var', 'x', 10],
+  ['var', 'y', 20],
+  ['*', 'x', 'y']
+]), 200)
+assert.strictEqual(i.eval(
+['begin',
+  ['var', 'x', 10],
+  ['begin',
+    ['var', 'x', 20],
+    ['set', 'x', 30]
+  ],
+  'x'
+]), 10)
 
 console.log("All tests passed")
