@@ -20,7 +20,7 @@ class Environment {
             return this
         }
         if (this.parent)
-            return this.resolve(variable)
+            return this.parent.resolve(variable)
 
         throw `VariableNotFound ${variable}`
     }
