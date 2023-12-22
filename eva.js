@@ -74,6 +74,15 @@ class Eva {
                 return this.eval(false_branch, env)
         }
 
+        if (input[0] === 'while') {
+            const [_tag, condition, code] = input
+            let result;
+            while (this.eval(condition, env)) {
+                result = this.eval(code, env)
+            }
+            return result
+        }
+
         if (isVariableName(input)) {
             return env.lookup(input)
         }
