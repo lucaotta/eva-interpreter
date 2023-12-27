@@ -1,0 +1,1 @@
+node_modules/syntax-cli/bin/syntax --grammar parser/eva-grammar.bnf --mode LALR1 --o parser/evaParser.js
