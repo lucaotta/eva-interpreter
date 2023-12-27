@@ -57,12 +57,8 @@ class Eva {
         }
 
         if (input[0] === 'begin') {
-            let result = null
             let blockEnv = new Environment({}, env)
-            for (let i = 1; i < input.length; i++) {
-                result = this.eval(input[i], blockEnv)
-            }
-            return result
+            return this._evalBlock(input, blockEnv)
         }
 
         if (input[0] === 'if') {
@@ -82,6 +78,13 @@ class Eva {
             return result
         }
 
+        // Function declaration (def square (x) (* x x))
+        if (input[0] === 'def') {
+            const [_tag, name, params, body] = input
+            const fn = {name: name, env: env, body: body, params: params}
+            return env.define(name, fn)
+        }
+
         if (this._isVariableName(input)) {
             return env.lookup(input)
         }
@@ -92,9 +95,32 @@ class Eva {
             const args = input.slice(1).map(arg => this.eval(arg, env))
             if (typeof fn === 'function')
                 return fn(...args)
+
+            if (fn.params.length != args.length)
+                throw `Wrong number of parameters for function ${fn.name}`
+            const newRecord = {}
+            fn.params.forEach((element, index) => {
+                newRecord[element] = args[index]
+            });
+            const newEnv = new Environment(newRecord, fn.env)
+            return this._evalBody(fn.body, newEnv)
         }
 
         throw `Unimplemented expression ${JSON.stringify(input)}`
+    }
+
+    _evalBlock(input, env) {
+        let result = null
+        for (let i = 1; i < input.length; i++) {
+            result = this.eval(input[i], env)
+        }
+        return result
+    }
+
+    _evalBody(input, env) {
+        if (input[0] === 'begin')
+            return this._evalBlock(input, env)
+        return this.eval(input, env)
     }
 
     _isNumber(input) {

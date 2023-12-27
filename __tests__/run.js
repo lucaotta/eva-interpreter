@@ -10,6 +10,7 @@ const tests = [
     require('./if-test.js'),
     require('./while-test.js'),
     require('./built-in-function-test.js'),
+    require('./custom-function-test.js'),
 ]
 
 const eva = new Eva()
