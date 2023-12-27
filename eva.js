@@ -79,10 +79,21 @@ class Eva {
         }
 
         // Function declaration (def square (x) (* x x))
+        // equivalent to: (var square (lambda (x) (* x x)))
         if (input[0] === 'def') {
             const [_tag, name, params, body] = input
-            const fn = {name: name, env: env, body: body, params: params}
-            return env.define(name, fn)
+            const varExpr = ['var', name, ['lambda', params, body]]
+            return this.eval(varExpr, env)
+        }
+
+        // Lambda function (lambda (x) (* x x))
+        if (input[0] === 'lambda') {
+            const [_tag, params, body] = input
+            return {
+                env: env,
+                params: params,
+                body: body
+            }
         }
 
         if (this._isVariableName(input)) {

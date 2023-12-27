@@ -11,6 +11,7 @@ const tests = [
     require('./while-test.js'),
     require('./built-in-function-test.js'),
     require('./custom-function-test.js'),
+    require('./lambda-function-test.js'),
 ]
 
 const eva = new Eva()
