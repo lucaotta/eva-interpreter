@@ -9,14 +9,10 @@ const tests = [
     require('./comparison-test.js'),
     require('./if-test.js'),
     require('./while-test.js'),
+    require('./built-in-function-test.js'),
 ]
 
-const eva = new Eva(new Environment({
-    'true': true,
-    'false': false,
-    'null': null,
-    'VERSION': 0.1,
-}))
+const eva = new Eva()
 
 tests.forEach(test => test(eva))
 

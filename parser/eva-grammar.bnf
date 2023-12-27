@@ -7,7 +7,7 @@
 \s+                         /* skip whitespaces */
 \d+(\.\d+)?                  return 'NUMBER'
 \"[^\"]*\"                  return 'STRING'
-[\w\-*+/<>]+                return 'SYMBOL'
+[\w\-*+/<>=]+                return 'SYMBOL'
 
 /lex
 
