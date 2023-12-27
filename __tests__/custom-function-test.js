@@ -52,4 +52,24 @@ module.exports = eva => {
 
     `,
     160);
+
+    // Recursive function:
+    testUtil.test(eva,
+        `
+          (begin
+    
+            (def fact (n)
+              (begin
+                (if (= n 1)
+                    1
+                    (* n (fact (- n 1)))
+                )
+              )
+            )
+    
+            (fact 2)
+          )
+    
+        `,
+        2);
 }
