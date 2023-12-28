@@ -15,6 +15,7 @@ const tests = [
     require('./switch-test.js'),
     require('./for-loop-test.js'),
     require('./class-test.js'),
+    require('./module-test.js'),
 ]
 
 const eva = new Eva()

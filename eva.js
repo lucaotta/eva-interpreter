@@ -13,7 +13,9 @@ const GlobalEnvironment = new Environment({
     '*'(op1, op2) {
         return op1 * op2
     },
-    '-'(op1, op2) {
+    '-'(op1, op2 = null) {
+        if (op1 < 0)
+            return -op1
         return op1 - op2
     },
     '/'(op1, op2) {
@@ -170,6 +172,14 @@ class Eva {
         if (input[0] === 'super') {
             const thisClass = this.eval(input[1], env)
             return thisClass.parent
+        }
+
+        // `(module <name> <expression>)`
+        if (input[0] === 'module') {
+            const [_tag, name, expression] = input
+            const moduleEnv = new Environment({}, env)
+            const e = this._evalBody(expression, moduleEnv)
+            return env.define(name, moduleEnv)
         }
 
         if (this._isVariableName(input)) {
