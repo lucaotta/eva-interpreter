@@ -9,8 +9,8 @@ module.exports = eva => {
     assert.strictEqual(eva.eval(['+', 5, ['*', 3, 2]]), 11)
     assert.strictEqual(eva.eval(['-', 5, ['*', 3, 2]]), -1)
     testUtil.test(eva, '(- 5 (/ 3 2))', 3.5)
-    testUtil.test(eva, '(begin (var x 0) (++ x) x)', 1)
-    testUtil.test(eva, '(begin (var x 0) (-- x) x)', -1)
-    testUtil.test(eva, '(begin (var x 1) (+= x 3) x)', 4)
-    testUtil.test(eva, '(begin (var x 1) (-= x 3) x)', -2)
+    testUtil.test(eva, '(var x 0) (++ x) x', 1)
+    testUtil.test(eva, '(var x 0) (-- x) x', -1)
+    testUtil.test(eva, '(var x 1) (+= x 3) x', 4)
+    testUtil.test(eva, '(var x 1) (-= x 3) x', -2)
 }

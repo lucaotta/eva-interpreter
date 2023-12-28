@@ -41,6 +41,11 @@ class Eva {
         this.env = global
         this._transformer = new Transformer()
     }
+
+    evalGlobal(expression) {
+        return this._evalBody(expression, this.env)
+    }
+
     eval(input, env = this.env) {
         if (this._isNumber(input))
             return input
