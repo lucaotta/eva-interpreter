@@ -14,6 +14,7 @@ const tests = [
     require('./lambda-function-test.js'),
     require('./switch-test.js'),
     require('./for-loop-test.js'),
+    require('./class-test.js'),
 ]
 
 const eva = new Eva()

@@ -54,8 +54,17 @@ class Eva {
         }
 
         if (input[0] === 'set') {
-            const [_, variable, value] = input
-            return env.assign(variable, this.eval(value, env))
+            const [_, ref, value] = input
+
+            // prop access
+            if (ref[0] === 'prop') {
+                const [_tag, instance, propName] = ref
+                let instanceEnv = this.eval(instance, env)
+                return instanceEnv.define(propName, this.eval(value, env))
+            }
+
+            // Simple assigment
+            return env.assign(ref, this.eval(value, env))
         }
 
         if (input[0] === 'begin') {
@@ -120,6 +129,38 @@ class Eva {
             return this.eval(this._transformer.subAndStore(input), env)
         }
 
+        // `(class <name> <parent> <body>)`
+        if (input[0] === 'class') {
+            const [_tag, name, parent, body] = input
+
+            const parentEnv = this.eval(parent, env) || env
+            const classEnv = new Environment({}, parentEnv)
+
+            const e = this.eval(body, classEnv)
+
+            return env.define(name, e.env)
+        }
+
+        // `(new <class> <arguments>)`
+        if (input[0] === 'new') {
+            const classEnv = this.eval(input[1], env)
+            const instance = new Environment({}, classEnv)
+
+            // copy from function invocation
+            const args = input.slice(2).map(arg => this.eval(arg, env))
+            const fn = classEnv.lookup('constructor')
+            this._callUserDefinedFunction(fn, [instance, ...args])
+
+            return instance
+        }
+
+        // `(prop <instance> <name>)`
+        if (input[0] === 'prop') {
+            const [_tag, instance, name] = input
+            const instanceEnv = this.eval(instance, env)
+            return instanceEnv.lookup(name)
+        }
+
         if (this._isVariableName(input)) {
             return env.lookup(input)
         }
@@ -130,18 +171,22 @@ class Eva {
             const args = input.slice(1).map(arg => this.eval(arg, env))
             if (typeof fn === 'function')
                 return fn(...args)
-
-            if (fn.params.length != args.length)
-                throw `Wrong number of parameters for function ${fn.name}`
-            const newRecord = {}
-            fn.params.forEach((element, index) => {
-                newRecord[element] = args[index]
-            });
-            const newEnv = new Environment(newRecord, fn.env)
-            return this._evalBody(fn.body, newEnv)
+            
+            return this._callUserDefinedFunction(fn, args)
         }
 
         throw `Unimplemented expression ${JSON.stringify(input)}`
+    }
+
+    _callUserDefinedFunction(fn, args) {
+        const activationRecord = {}
+        if (fn.params.length != args.length)
+            throw `Wrong number of parameters for function ${fn.name}`
+        fn.params.forEach((element, index) => {
+            activationRecord[element] = args[index]
+        });
+        const activationEnvironment = new Environment(activationRecord, fn.env)
+        return this._evalBody(fn.body, activationEnvironment)
     }
 
     _evalBlock(input, env) {
