@@ -166,6 +166,12 @@ class Eva {
             return instanceEnv.lookup(name)
         }
 
+        // `(super <className>)`
+        if (input[0] === 'super') {
+            const thisClass = this.eval(input[1], env)
+            return thisClass.parent
+        }
+
         if (this._isVariableName(input)) {
             return env.lookup(input)
         }
