@@ -1,4 +1,5 @@
 const assert = require('assert');
+const {test} = require('./test-utils');
 
 module.exports = eva => {
     assert.strictEqual(eva.eval(

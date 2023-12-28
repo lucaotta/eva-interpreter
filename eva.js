@@ -1,5 +1,6 @@
 
 const Environment = require("./environment")
+const Transformer = require("./transformer/trasformer")
 
 const GlobalEnvironment = new Environment({
     'true': true,
@@ -38,6 +39,7 @@ const GlobalEnvironment = new Environment({
 class Eva {
     constructor(global = GlobalEnvironment) {
         this.env = global
+        this._transformer = new Transformer()
     }
     eval(input, env = this.env) {
         if (this._isNumber(input))
@@ -78,12 +80,9 @@ class Eva {
             return result
         }
 
-        // Function declaration (def square (x) (* x x))
-        // equivalent to: (var square (lambda (x) (* x x)))
+        // Function declaration
         if (input[0] === 'def') {
-            const [_tag, name, params, body] = input
-            const varExpr = ['var', name, ['lambda', params, body]]
-            return this.eval(varExpr, env)
+            return this.eval(this._transformer.defToLambda(input), env)
         }
 
         // Lambda function (lambda (x) (* x x))
@@ -94,6 +93,31 @@ class Eva {
                 params: params,
                 body: body
             }
+        }
+
+        if (input[0] === 'switch') {
+            return this.eval(this._transformer.switchToIf(input), env)
+        }
+
+        if (input[0] === 'for') {
+            return this.eval(this._transformer.forToWhile(input), env)
+        }
+
+        // Increment: (++ x)
+        if (input[0] === '++') {
+            return this.eval(this._transformer.incrementToSet(input), env)
+        }
+        // Increment: (-- x)
+        if (input[0] === '--') {
+            return this.eval(this._transformer.decrementToSet(input), env)
+        }
+        // Increment: (+= x 4)
+        if (input[0] === '+=') {
+            return this.eval(this._transformer.addAndStore(input), env)
+        }
+        // Increment: (-= x 4)
+        if (input[0] === '-=') {
+            return this.eval(this._transformer.subAndStore(input), env)
         }
 
         if (this._isVariableName(input)) {

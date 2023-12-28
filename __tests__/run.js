@@ -12,6 +12,8 @@ const tests = [
     require('./built-in-function-test.js'),
     require('./custom-function-test.js'),
     require('./lambda-function-test.js'),
+    require('./switch-test.js'),
+    require('./for-loop-test.js'),
 ]
 
 const eva = new Eva()
