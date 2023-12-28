@@ -16,6 +16,7 @@ const tests = [
     require('./for-loop-test.js'),
     require('./class-test.js'),
     require('./module-test.js'),
+    require('./import-test.js'),
 ]
 
 const eva = new Eva()

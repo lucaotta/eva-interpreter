@@ -1,6 +1,8 @@
 
 const Environment = require("./environment")
 const Transformer = require("./transformer/trasformer")
+const EvaParser = require('./parser/evaParser')
+const fs = require('node:fs')
 
 const GlobalEnvironment = new Environment({
     'true': true,
@@ -175,11 +177,26 @@ class Eva {
         }
 
         // `(module <name> <expression>)`
+        // Also support `(export <name1> <name2>)
         if (input[0] === 'module') {
             const [_tag, name, expression] = input
             const moduleEnv = new Environment({}, env)
-            const e = this._evalBody(expression, moduleEnv)
+            this._evalBody(expression, moduleEnv)
             return env.define(name, moduleEnv)
+        }
+
+        // `(import <name>)`
+        // Also accept the list of names for a particular module:
+        // `(import (name1 name2) <name>)
+        if (input[0] === 'import') {
+            const name = input[1]
+            const moduleSrc = fs.readFileSync(`./modules/${name}.eva`, 'utf-8')
+            const body = EvaParser.parse(`(begin ${moduleSrc})`)
+
+            // "Transform" this into a module so that we can use the `module`
+            // code path
+            const moduleExp = ['module', name, body]
+            return this.eval(moduleExp, this.env)
         }
 
         if (this._isVariableName(input)) {
